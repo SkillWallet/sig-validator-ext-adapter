@@ -1,4 +1,11 @@
 const { Requester, Validator } = require('@chainlink/external-adapter')
+const { default: axios } = require('axios')
+var EC = require('elliptic').ec;
+var keccak256 = require('keccak256');
+
+// Create and initialize EC context
+// (better do it once and reuse it)
+var ec = new EC('secp256k1');
 
 // Define custom error scenarios for the API.
 // Return true for the adapter to retry.
@@ -16,51 +23,52 @@ const customParams = {
     endpoint: false
 }
 
-const calculateDitoCreditsRequest = (input, callback) => {
+const validateSignature = (input, callback) => {
     // The Validator helps you validate the Chainlink request data
     const validator = new Validator(callback, input, customParams)
-    const jobRunID = validator.validated.id
-    const user = validator.validated.data.user
+    const jobRunID = validator.validated.id;
+    const pubKey = validator.validated.data.pubKey;
+    const action = validator.validated.data.action;
+    const tokenId = validator.validated.data.tokenId;
+    const signature = validator.validated.data.signature;
 
-    const ditoCredits = 2006;
+
+    const noncesResp = await axios.get(`http://localhost:3005/api/skillwallet/${tokenId}/nonces?action=${action}`)
+    let foundValidNonce = false;
+    noncesResp.data.nonces.forEach(nonce => {
+        const bufferNonce = Buffer.from(nonce);
+        const recoveredObj = ec.recoverPubKey(bufferNonce, signature, 0);
+        const recoveredKey = ec.keyFromPublic(recoveredObj, 'hex');
+        const hexRecoveredKey = recoveredKey.getPublic('hex');
+        const hashedRecoveredPubKey = keccak256(hexRecoveredKey).toString('hex');
+        if(hashedRecoveredPubKey === pubKey) {
+            foundValidNonce = true;
+            break;
+        }
+    });
+
+    if(foundValidNonce) {
+        const deleteRes = await axios.delete(`http://localhost:3005/api/skillwallet/${tokenId}/nonces?action=${action}`);
+        if(deleteRes.status === 200) {
+            //return success?
+        } else {
+            // return error
+        }
+    } else {
+        isValid = true;
+        // return error
+    }
+
+
 
     const response = {
         jobRunID: jobRunID,
-        data: {user: user, result: ditoCredits},
-        result: ditoCredits,
+        data: { tokenId, isValid: foundValidNonce },
+        result: foundValidNonce,
         statusCode: 200
     }
 
     callback(200, response);
-
-    // TODO: Implement this later
-    // const url = `https://dito.io/calculateDitoCredits/${user}`
-    //
-    // // This is where you would add method and headers
-    // // you can add method like GET or POST and add it to the config
-    // // The default is GET requests
-    // // method = 'get'
-    // // headers = 'headers.....'
-    // const config = {
-    //     url,
-    // }
-    //
-    // // The Requester allows API calls be retry in case of timeout
-    // // or connection failure
-    // Requester.request(config, customError)
-    //     .then(response => {
-    //         // It's common practice to store the desired value at the top-level
-    //         // result key. This allows different adapters to be compatible with
-    //         // one another.
-    //         console.log("Requester response", response)
-    //         response.data.result = response.result
-    //         callback(response.status, Requester.success(jobRunID, response))
-    //     })
-    //     .catch(error => {
-    //         callback(500, Requester.errored(jobRunID, error))
-    //     })
-
-
 }
 
 // This is a wrapper to allow the function to work with

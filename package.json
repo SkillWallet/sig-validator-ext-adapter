@@ -9,7 +9,10 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "@chainlink/external-adapter": "^0.2.3"
+    "@chainlink/external-adapter": "^0.2.3",
+    "axios":"^0.21.1",
+    "elliptic":"6.5.4",
+    "keccak256": "1.0.2"
   },
   "devDependencies": {
     "body-parser": "^1.19.0",
