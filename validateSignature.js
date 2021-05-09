@@ -19,7 +19,11 @@ const customError = (data) => {
 // with a Boolean value indicating whether or not they
 // should be required.
 const customParams = {
-    user: ['user', 'address', 'owner'],
+    pubKey: ['pubKey', 'publicKey'],
+    signature: ['sig', 'signature'],
+    action: ['action'],
+    tokenId: ['tokenId', 'owner', 'skillWalletId'],
+    recoveryParam: ['recoveryParam', 'recoveryParameter'],
     endpoint: false
 }
 
@@ -42,8 +46,11 @@ const validateSignature = (input, callback) => {
     const signatureBytes = hexToBytes(signature);
 
     const noncesResp = await axios.get(`http://localhost:3005/api/skillwallet/${tokenId}/nonces?action=${action}`)
+    const nonces = noncesResp.data;
+    // const nonces = ["0", "123123", "1", "2"];
     let foundValidNonce = false;
-    noncesResp.data.nonces.forEach(nonce => {
+    nonces.forEach(nonce => {
+        console.log(nonce);
         const bufferNonce = Buffer.from(nonce);
         const recoveredObj = ec.recoverPubKey(bufferNonce, signatureBytes, recoveryParam);
         const recoveredKey = ec.keyFromPublic(recoveredObj, 'hex');
@@ -51,8 +58,11 @@ const validateSignature = (input, callback) => {
         const hashedRecoveredPubKey = keccak256(hexRecoveredKey).toString('hex');
         if (hashedRecoveredPubKey === pubKey) {
             foundValidNonce = true;
-            break;
+            console.log('found valid nonce');
+            return;
         }
+        console.log('did not find valid nonce');
+
     });
 
     if (foundValidNonce) {
@@ -67,11 +77,9 @@ const validateSignature = (input, callback) => {
         // return error
     }
 
-
-
     const response = {
         jobRunID: jobRunID,
-        data: { tokenId, isValid: foundValidNonce },
+        data: { isValid: foundValidNonce },
         result: foundValidNonce,
         statusCode: 200
     }
@@ -82,7 +90,7 @@ const validateSignature = (input, callback) => {
 // This is a wrapper to allow the function to work with
 // GCP Functions
 exports.gcpservice = (req, res) => {
-    calculateDitoCreditsRequest(req.body, (statusCode, data) => {
+    validateSignature(req.body, (statusCode, data) => {
         res.status(statusCode).send(data)
     })
 }
@@ -90,7 +98,7 @@ exports.gcpservice = (req, res) => {
 // This is a wrapper to allow the function to work with
 // AWS Lambda
 exports.handler = (event, context, callback) => {
-    calculateDitoCreditsRequest(event, (statusCode, data) => {
+    validateSignature(event, (statusCode, data) => {
         callback(null, data)
     })
 }
@@ -98,7 +106,7 @@ exports.handler = (event, context, callback) => {
 // This is a wrapper to allow the function to work with
 // newer AWS Lambda implementations
 exports.handlerv2 = (event, context, callback) => {
-    calculateDitoCreditsRequest(JSON.parse(event.body), (statusCode, data) => {
+    validateSignature(JSON.parse(event.body), (statusCode, data) => {
         callback(null, {
             statusCode: statusCode,
             body: JSON.stringify(data),
@@ -109,4 +117,4 @@ exports.handlerv2 = (event, context, callback) => {
 
 // This allows the function to be exported for testing
 // or for running in express
-module.exports.calculateDitoCreditsRequest = calculateDitoCreditsRequest
+module.exports.validateSignature = validateSignature

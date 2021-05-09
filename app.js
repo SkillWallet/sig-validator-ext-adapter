@@ -17,7 +17,7 @@ app.post('/createRandomString', (req, res) => {
 })
 
 
-app.post('/calculateDitoCredits', (req, res) => {
+app.post('/validateSignature', (req, res) => {
   console.log('POST Data: ', req.body)
   validateSignature(req.body, (status, result) => {
     console.log('Result: ', result)
