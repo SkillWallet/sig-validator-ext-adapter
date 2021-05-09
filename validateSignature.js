@@ -1,4 +1,4 @@
-const { Requester, Validator } = require('@chainlink/external-adapter')
+const { Validator } = require('@chainlink/external-adapter')
 const { default: axios } = require('axios')
 var EC = require('elliptic').ec;
 var keccak256 = require('keccak256');
@@ -31,25 +31,33 @@ const validateSignature = (input, callback) => {
     const action = validator.validated.data.action;
     const tokenId = validator.validated.data.tokenId;
     const signature = validator.validated.data.signature;
+    const recoveryParam = validator.validated.data.recoveryParam;
 
+    function hexToBytes(hex) {
+        for (var bytes = [], c = 0; c < hex.length; c += 2)
+            bytes.push(parseInt(hex.substr(c, 2), 16));
+        return bytes;
+    }
+
+    const signatureBytes = hexToBytes(signature);
 
     const noncesResp = await axios.get(`http://localhost:3005/api/skillwallet/${tokenId}/nonces?action=${action}`)
     let foundValidNonce = false;
     noncesResp.data.nonces.forEach(nonce => {
         const bufferNonce = Buffer.from(nonce);
-        const recoveredObj = ec.recoverPubKey(bufferNonce, signature, 0);
+        const recoveredObj = ec.recoverPubKey(bufferNonce, signatureBytes, recoveryParam);
         const recoveredKey = ec.keyFromPublic(recoveredObj, 'hex');
         const hexRecoveredKey = recoveredKey.getPublic('hex');
         const hashedRecoveredPubKey = keccak256(hexRecoveredKey).toString('hex');
-        if(hashedRecoveredPubKey === pubKey) {
+        if (hashedRecoveredPubKey === pubKey) {
             foundValidNonce = true;
             break;
         }
     });
 
-    if(foundValidNonce) {
+    if (foundValidNonce) {
         const deleteRes = await axios.delete(`http://localhost:3005/api/skillwallet/${tokenId}/nonces?action=${action}`);
-        if(deleteRes.status === 200) {
+        if (deleteRes.status === 200) {
             //return success?
         } else {
             // return error
