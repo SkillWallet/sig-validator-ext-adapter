@@ -27,7 +27,7 @@ const customParams = {
     endpoint: false
 }
 
-const validateSignature = (input, callback) => {
+const validateSignature = async (input, callback) => {
     // The Validator helps you validate the Chainlink request data
     const validator = new Validator(callback, input, customParams)
     const jobRunID = validator.validated.id;
@@ -45,7 +45,7 @@ const validateSignature = (input, callback) => {
 
     const signatureBytes = hexToBytes(signature);
 
-    const noncesResp = await axios.get(`http://localhost:3005/api/skillwallet/${tokenId}/nonces?action=${action}`)
+    const noncesResp = await axios.get(`https://api.distributed.town/api/skillwallet/${tokenId}/nonces?action=${action}`)
     const nonces = noncesResp.data;
     // const nonces = ["0", "123123", "1", "2"];
     let foundValidNonce = false;
@@ -66,7 +66,7 @@ const validateSignature = (input, callback) => {
     });
 
     if (foundValidNonce) {
-        const deleteRes = await axios.delete(`http://localhost:3005/api/skillwallet/${tokenId}/nonces?action=${action}`);
+        const deleteRes = await axios.delete(`https://api.distributed.towns/api/skillwallet/${tokenId}/nonces?action=${action}`);
         if (deleteRes.status === 200) {
             //return success?
         } else {
