@@ -24,6 +24,8 @@ const customParams = {
     action: ['action'],
     tokenId: ['tokenId', 'owner', 'skillWalletId'],
     recoveryParam: ['recoveryParam', 'recoveryParameter'],
+    getNonceUrl: ['getNonceUrl', 'getNonce'],
+    deleteNonceUrl: ['deleteNonceUrl', 'delNonceUrl'],
     endpoint: false
 }
 
@@ -36,6 +38,8 @@ const validateSignature = async (input, callback) => {
     const tokenId = validator.validated.data.tokenId;
     const signature = validator.validated.data.signature;
     const recoveryParam = validator.validated.data.recoveryParam;
+    const getNonceUrl = validator.validated.data.getNonceUrl;
+    const deleteNonceUrl = validator.validated.data.deleteNonceUrl;
 
     function hexToBytes(hex) {
         for (var bytes = [], c = 0; c < hex.length; c += 2)
@@ -45,7 +49,7 @@ const validateSignature = async (input, callback) => {
 
     const signatureBytes = hexToBytes(signature);
 
-    const noncesResp = await axios.get(`https://api.distributed.town/api/skillwallet/${tokenId}/nonces?action=${action}`)
+    const noncesResp = await axios.get(getNonceUrl)
     const nonces = noncesResp.data;
     // const nonces = ["0", "123123", "1", "2"];
     let foundValidNonce = false;
@@ -66,7 +70,7 @@ const validateSignature = async (input, callback) => {
     });
 
     if (foundValidNonce) {
-        const deleteRes = await axios.delete(`https://api.distributed.towns/api/skillwallet/${tokenId}/nonces?action=${action}`);
+        const deleteRes = await axios.delete(deleteNonceUrl);
         if (deleteRes.status === 200) {
             //return success?
         } else {
