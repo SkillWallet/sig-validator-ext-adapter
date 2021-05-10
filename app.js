@@ -1,5 +1,4 @@
-const createRandomStringRequest = require('./createRandomString').createRandomStringRequest
-const calculateDitoCreditsRequest = require('./calculateDitoCredits').calculateDitoCreditsRequest
+const validateSignature = require('./validateSignature').validateSignature
 
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -8,18 +7,9 @@ const port = process.env.EA_PORT || 8080
 
 app.use(bodyParser.json())
 
-app.post('/createRandomString', (req, res) => {
+app.post('/validateSignature', (req, res) => {
   console.log('POST Data: ', req.body)
-  createRandomStringRequest(req.body, (status, result) => {
-    console.log('Result: ', result)
-    res.status(status).json(result)
-  })
-})
-
-
-app.post('/calculateDitoCredits', (req, res) => {
-  console.log('POST Data: ', req.body)
-  calculateDitoCreditsRequest(req.body, (status, result) => {
+  validateSignature(req.body, (status, result) => {
     console.log('Result: ', result)
     res.status(status).json(result)
   })
