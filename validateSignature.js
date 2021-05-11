@@ -50,8 +50,7 @@ const validateSignature = async (input, callback) => {
     const signatureBytes = hexToBytes(signature);
 
     const noncesResp = await axios.get(getNonceUrl)
-    const nonces = noncesResp.data;
-    // const nonces = ["0", "123123", "1", "2"];
+    const nonces = noncesResp.data.nonces;
     let foundValidNonce = false;
     nonces.forEach(nonce => {
         console.log(nonce);
