@@ -1,11 +1,7 @@
 const { Validator } = require('@chainlink/external-adapter')
 const { default: axios } = require('axios')
-var EC = require('elliptic').ec;
-var keccak256 = require('keccak256');
+var eccryptoJS = require('eccrypto-js');
 
-// Create and initialize EC context
-// (better do it once and reuse it)
-var ec = new EC('secp256k1');
 
 // Define custom error scenarios for the API.
 // Return true for the adapter to retry.
@@ -23,7 +19,6 @@ const customParams = {
     signature: ['sig', 'signature'],
     action: ['action'],
     tokenId: ['tokenId', 'owner', 'skillWalletId'],
-    recoveryParam: ['recoveryParam', 'recoveryParameter'],
     getNonceUrl: ['getNonceUrl', 'getNonce'],
     deleteNonceUrl: ['deleteNonceUrl', 'delNonceUrl'],
     endpoint: false
@@ -37,7 +32,6 @@ const validateSignature = async (input, callback) => {
     const action = validator.validated.data.action;
     const tokenId = validator.validated.data.tokenId;
     const signature = validator.validated.data.signature;
-    const recoveryParam = validator.validated.data.recoveryParam;
     const getNonceUrl = validator.validated.data.getNonceUrl;
     const deleteNonceUrl = validator.validated.data.deleteNonceUrl;
 
@@ -48,25 +42,28 @@ const validateSignature = async (input, callback) => {
     }
 
     const signatureBytes = hexToBytes(signature);
+    const buf = Buffer.from(signatureBytes);
 
     const noncesResp = await axios.get(getNonceUrl)
     const nonces = noncesResp.data.nonces;
+    // const nonces = [1, 123, 2];
     let foundValidNonce = false;
-    nonces.forEach(nonce => {
+    for (const nonce of nonces) {
         console.log(nonce);
-        const bufferNonce = Buffer.from(nonce);
-        const recoveredObj = ec.recoverPubKey(bufferNonce, signatureBytes, recoveryParam);
-        const recoveredKey = ec.keyFromPublic(recoveredObj, 'hex');
-        const hexRecoveredKey = recoveredKey.getPublic('hex');
-        const hashedRecoveredPubKey = keccak256(hexRecoveredKey).toString('hex');
-        if (hashedRecoveredPubKey === pubKey) {
+        const msg = eccryptoJS.utf8ToBuffer(nonce.toString());
+        const hash = await eccryptoJS.sha256(msg);
+        const pub = eccryptoJS.recover(hash, buf);
+        const recoveredHexPub = pub.toString('hex');
+        const hashedRecoveredPub = eccryptoJS.keccak256(Buffer.from(recoveredHexPub));
+
+        if (pubKey === eccryptoJS.bufferToHex(hashedRecoveredPub)) {
             foundValidNonce = true;
             console.log('found valid nonce');
-            return;
+            break;
         }
         console.log('did not find valid nonce');
 
-    });
+    }
 
     if (foundValidNonce) {
         const deleteRes = await axios.delete(deleteNonceUrl);

@@ -11,8 +11,7 @@
   "dependencies": {
     "@chainlink/external-adapter": "^0.2.3",
     "axios":"^0.21.1",
-    "elliptic":"6.5.4",
-    "keccak256": "1.0.2"
+    "eccrypto-js": "^5.4.0"
   },
   "devDependencies": {
     "body-parser": "^1.19.0",
