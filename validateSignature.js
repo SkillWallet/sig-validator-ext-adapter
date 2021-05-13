@@ -17,8 +17,6 @@ const customError = (data) => {
 const customParams = {
     pubKey: ['pubKey', 'publicKey'],
     signature: ['sig', 'signature'],
-    action: ['action'],
-    tokenId: ['tokenId', 'owner', 'skillWalletId'],
     getNonceUrl: ['getNonceUrl', 'getNonce'],
     deleteNonceUrl: ['deleteNonceUrl', 'delNonceUrl'],
     endpoint: false
@@ -29,8 +27,6 @@ const validateSignature = async (input, callback) => {
     const validator = new Validator(callback, input, customParams)
     const jobRunID = validator.validated.id;
     const pubKey = validator.validated.data.pubKey;
-    const action = validator.validated.data.action;
-    const tokenId = validator.validated.data.tokenId;
     const signature = validator.validated.data.signature;
     const getNonceUrl = validator.validated.data.getNonceUrl;
     const deleteNonceUrl = validator.validated.data.deleteNonceUrl;
@@ -65,17 +61,8 @@ const validateSignature = async (input, callback) => {
 
     }
 
-    if (foundValidNonce) {
-        const deleteRes = await axios.delete(deleteNonceUrl);
-        if (deleteRes.status === 200) {
-            //return success?
-        } else {
-            // return error
-        }
-    } else {
-        isValid = true;
-        // return error
-    }
+    if (foundValidNonce && deleteNonceUrl)
+        await axios.delete(deleteNonceUrl);
 
     const response = {
         jobRunID: jobRunID,

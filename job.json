@@ -1,0 +1,30 @@
+{
+    "initiators": [
+        {
+            "type": "runlog",
+            "params": {
+                "address": "0xb5BA7f14Fe0205593255c77875348281b44DE7BF"
+            }
+        }
+    ],
+    "tasks": [
+        {
+            "type": "sw-validator",
+            "confirmations": null,
+            "params": {}
+        },
+        {
+            "type": "copy",
+            "confirmations": null,
+            "params": {}
+        },
+        {
+            "type": "EthTx"
+        },
+        {
+            "type": "EthBool"
+        }
+    ],
+    "startAt": null,
+    "endAt": null
+}
