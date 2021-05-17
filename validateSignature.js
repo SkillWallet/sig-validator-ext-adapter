@@ -23,6 +23,7 @@ const customParams = {
 }
 
 const validateSignature = async (input, callback) => {
+    console.log('chainlink adapter called');
     // The Validator helps you validate the Chainlink request data
     const validator = new Validator(callback, input, customParams)
     const jobRunID = validator.validated.id;
@@ -30,6 +31,7 @@ const validateSignature = async (input, callback) => {
     const signature = validator.validated.data.signature;
     const getNonceUrl = validator.validated.data.getNonceUrl;
     const deleteNonceUrl = validator.validated.data.deleteNonceUrl;
+    console.log('validation passed');
 
     function hexToBytes(hex) {
         for (var bytes = [], c = 0; c < hex.length; c += 2)
@@ -39,10 +41,15 @@ const validateSignature = async (input, callback) => {
 
     const signatureBytes = hexToBytes(signature);
     const buf = Buffer.from(signatureBytes);
+    console.log('signature parsed to bytes');
 
     const noncesResp = await axios.get(getNonceUrl)
+    console.log('fetched nonces');
+    console.log(noncesResp);
+
     const nonces = noncesResp.data.nonces;
     // const nonces = [1, 123, 2];
+    console.log(nonces);
     let foundValidNonce = false;
     for (const nonce of nonces) {
         console.log(nonce);
