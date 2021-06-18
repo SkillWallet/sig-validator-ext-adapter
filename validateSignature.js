@@ -45,7 +45,7 @@ const validateSignature = async (input, callback) => {
 
     // const noncesResp = await axios.get(getNonceUrl)
     console.log('fetched nonces');
-    console.log(noncesResp);
+    // console.log(noncesResp);
 
     // const nonces = noncesResp.data.nonces;
     const nonces = [1, 123, 2];
