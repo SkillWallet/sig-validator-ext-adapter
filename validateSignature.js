@@ -68,8 +68,8 @@ const validateSignature = async (input, callback) => {
 
     }
 
-    if (foundValidNonce && deleteNonceUrl)
-        await axios.delete(deleteNonceUrl);
+    // if (foundValidNonce && deleteNonceUrl)
+    //     await axios.delete(deleteNonceUrl);
 
     const response = {
         jobRunID: jobRunID,
