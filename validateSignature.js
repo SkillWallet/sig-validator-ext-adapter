@@ -43,12 +43,12 @@ const validateSignature = async (input, callback) => {
     const buf = Buffer.from(signatureBytes);
     console.log('signature parsed to bytes');
 
-    // const noncesResp = await axios.get(getNonceUrl)
+    const noncesResp = await axios.get(getNonceUrl)
     console.log('fetched nonces');
-    // console.log(noncesResp);
+    console.log(noncesResp);
 
-    // const nonces = noncesResp.data.nonces;
-    const nonces = [1, 123, 2];
+    const nonces = noncesResp.data.nonces;
+    // const nonces = [1, 123, 2];
     console.log(nonces);
     let foundValidNonce = false;
     for (const nonce of nonces) {
@@ -68,8 +68,8 @@ const validateSignature = async (input, callback) => {
 
     }
 
-    // if (foundValidNonce && deleteNonceUrl)
-    //     await axios.delete(deleteNonceUrl);
+    if (foundValidNonce && deleteNonceUrl)
+        await axios.delete(deleteNonceUrl);
 
     const response = {
         jobRunID: jobRunID,
