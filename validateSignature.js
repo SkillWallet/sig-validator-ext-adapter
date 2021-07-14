@@ -48,7 +48,7 @@ const validateSignature = async (input, callback) => {
     console.log(noncesResp);
 
     const nonces = noncesResp.data.nonces;
-    const validNonce = '';
+    let validNonce = '';
     console.log(nonces);
     let foundValidNonce = false;
     for (const nonce of nonces) {
