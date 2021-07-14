@@ -48,7 +48,6 @@ const validateSignature = async (input, callback) => {
     console.log(noncesResp);
 
     const nonces = noncesResp.data.nonces;
-    // const nonces = [1, 123, 2];
     console.log(nonces);
     let foundValidNonce = false;
     for (const nonce of nonces) {
@@ -67,9 +66,9 @@ const validateSignature = async (input, callback) => {
         console.log('did not find valid nonce');
 
     }
-
-    // if (foundValidNonce && deleteNonceUrl)
-    //     await axios.delete(deleteNonceUrl);
+    // TODO: fix & uncomment
+    if (foundValidNonce && deleteNonceUrl)
+        await axios.delete(deleteNonceUrl);
 
     const response = {
         jobRunID: jobRunID,
