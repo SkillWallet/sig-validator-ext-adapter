@@ -48,6 +48,7 @@ const validateSignature = async (input, callback) => {
     console.log(noncesResp);
 
     const nonces = noncesResp.data.nonces;
+    const validNonce = '';
     console.log(nonces);
     let foundValidNonce = false;
     for (const nonce of nonces) {
@@ -60,6 +61,7 @@ const validateSignature = async (input, callback) => {
 
         if (pubKey === eccryptoJS.bufferToHex(hashedRecoveredPub)) {
             foundValidNonce = true;
+            validNonce = nonce;
             console.log('found valid nonce');
             break;
         }
@@ -68,7 +70,7 @@ const validateSignature = async (input, callback) => {
     }
     // TODO: fix & uncomment
     if (foundValidNonce && deleteNonceUrl)
-        await axios.delete(deleteNonceUrl);
+        await axios.delete(deleteNonceUrl + `&nonce=${validNonce}`);
 
     const response = {
         jobRunID: jobRunID,
