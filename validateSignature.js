@@ -1,14 +1,8 @@
 const { Validator } = require('@chainlink/external-adapter')
 const { default: axios } = require('axios')
 var eccryptoJS = require('eccrypto-js');
-
-
-// Define custom error scenarios for the API.
-// Return true for the adapter to retry.
-const customError = (data) => {
-    if (data.Response === 'Error') return true
-    return false
-}
+var EC = require('elliptic').ec;
+var ec = new EC('p256');
 
 // Define custom parameters to be used by the adapter.
 // Extra parameters can be stated in the extra object,
@@ -33,16 +27,6 @@ const validateSignature = async (input, callback) => {
     const deleteNonceUrl = validator.validated.data.deleteNonceUrl;
     console.log('validation passed');
 
-    function hexToBytes(hex) {
-        for (var bytes = [], c = 0; c < hex.length; c += 2)
-            bytes.push(parseInt(hex.substr(c, 2), 16));
-        return bytes;
-    }
-
-    const signatureBytes = hexToBytes(signature);
-    const buf = Buffer.from(signatureBytes);
-    console.log('signature parsed to bytes');
-
     const noncesResp = await axios.get(getNonceUrl)
     console.log('fetched nonces');
     console.log(noncesResp);
@@ -53,13 +37,12 @@ const validateSignature = async (input, callback) => {
     let foundValidNonce = false;
     for (const nonce of nonces) {
         console.log(nonce);
-        const msg = eccryptoJS.utf8ToBuffer(nonce.toString());
+        const msg = Buffer.from(nonce.toString());
         const hash = await eccryptoJS.sha256(msg);
-        const pub = eccryptoJS.recover(hash, buf);
-        const recoveredHexPub = pub.toString('hex');
-        const hashedRecoveredPub = eccryptoJS.keccak256(Buffer.from(recoveredHexPub));
+        const public = ec.keyFromPublic(pubKey, 'hex');
+        const isVerified = public.verify(hash, signature)
 
-        if (pubKey === eccryptoJS.bufferToHex(hashedRecoveredPub)) {
+        if (isVerified) {
             foundValidNonce = true;
             validNonce = nonce;
             console.log('found valid nonce');
