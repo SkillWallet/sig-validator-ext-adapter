@@ -9,7 +9,7 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "@chainlink/external-adapter": "^0.2.3",
+    "@chainlink/external-adapter": "^0.2.6",
     "axios":"^0.21.1",
     "eccrypto-js": "^5.4.0",
     "elliptic":"6.5.4"

@@ -61,7 +61,12 @@ const validateSignature = async (input, callback) => {
         statusCode: 200
     }
 
-    callback(200, response);
+    if(response.foundValidNonce) { 
+        callback(200, response);
+    } else {
+        callback(400, response);
+    }
+
 }
 
 // This is a wrapper to allow the function to work with
