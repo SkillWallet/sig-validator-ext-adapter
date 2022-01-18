@@ -56,7 +56,7 @@ const validateSignature = async (input, callback) => {
 
     const response = {
         jobRunID: jobRunID,
-        data: { isValid: foundValidNonce },
+        data: foundValidNonce,
         result: foundValidNonce,
         statusCode: 200
     }
