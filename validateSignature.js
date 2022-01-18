@@ -61,10 +61,20 @@ const validateSignature = async (input, callback) => {
         statusCode: 200
     }
 
-    if(response.foundValidNonce) { 
-        callback(200, response);
+    if(foundValidNonce) { 
+        callback(200, {
+            jobRunID, 
+            data: true, 
+            result: true, 
+            status: 200
+        });
     } else {
-        callback(400, response);
+        callback(400, {
+            jobRunID, 
+            data: false, 
+            result: false, 
+            status: 200
+        });
     }
 
 }
