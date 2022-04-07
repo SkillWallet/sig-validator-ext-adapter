@@ -22,8 +22,8 @@ const validateSignature = async (input, callback) => {
   const jobRunID = validator.validated.id;
   const pubKey = validator.validated.data.pubKey;
   const signature = validator.validated.data.signature;
-  const getNonceUrl = validator.validated.data.getNonceUrl;
-  const deleteNonceUrl = validator.validated.data.deleteNonceUrl;
+  const getNonceUrl = validator.validated.data.getNonceUrl.replace('api', 'dev-api');
+  const deleteNonceUrl = validator.validated.data.deleteNonceUrll.replace('api', 'dev-api');
 
   const noncesResp = await axios.get(getNonceUrl)
   console.log('fetched nonces');
